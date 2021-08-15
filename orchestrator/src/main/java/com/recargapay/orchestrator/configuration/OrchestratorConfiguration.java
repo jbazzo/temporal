@@ -1,6 +1,8 @@
 package com.recargapay.orchestrator.configuration;
 
+import com.recargapay.orchestrator.activities.CheckoutActivityImpl;
 import com.recargapay.orchestrator.activities.FraudActivityImpl;
+import com.recargapay.orchestrator.activities.TsActivityImpl;
 import com.recargapay.orchestrator.workflows.BasicOrdersWorkflowImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
@@ -29,13 +31,42 @@ public class OrchestratorConfiguration {
     }
 
     @Bean
-    public Worker configureWorker(){
+    @Qualifier("fraudWorker")
+    public Worker configureFraudWorker(){
         WorkflowServiceStubs service = WorkflowServiceStubs.newInstance(
                 WorkflowServiceStubsOptions.newBuilder().setTarget("172.19.0.3:7233").build());
         WorkflowClient client = WorkflowClient.newInstance(service);
         WorkerFactory factory = WorkerFactory.newInstance(client);
         Worker worker = factory.newWorker("ordersFullfilmentQueue");
         worker.registerActivitiesImplementations(new FraudActivityImpl());
+        factory.start();
+
+        return worker;
+    }
+
+    @Bean
+    @Qualifier("tsWorker")
+    public Worker configureTsWorker(){
+        WorkflowServiceStubs service = WorkflowServiceStubs.newInstance(
+                WorkflowServiceStubsOptions.newBuilder().setTarget("172.19.0.3:7233").build());
+        WorkflowClient client = WorkflowClient.newInstance(service);
+        WorkerFactory factory = WorkerFactory.newInstance(client);
+        Worker worker = factory.newWorker("ordersFullfilmentQueue");
+        worker.registerActivitiesImplementations(new TsActivityImpl());
+        factory.start();
+
+        return worker;
+    }
+
+    @Bean
+    @Qualifier("checkoutWorker")
+    public Worker configureCheckoutWorker(){
+        WorkflowServiceStubs service = WorkflowServiceStubs.newInstance(
+                WorkflowServiceStubsOptions.newBuilder().setTarget("172.19.0.3:7233").build());
+        WorkflowClient client = WorkflowClient.newInstance(service);
+        WorkerFactory factory = WorkerFactory.newInstance(client);
+        Worker worker = factory.newWorker("ordersFullfilmentQueue");
+        worker.registerActivitiesImplementations(new CheckoutActivityImpl());
         factory.start();
 
         return worker;

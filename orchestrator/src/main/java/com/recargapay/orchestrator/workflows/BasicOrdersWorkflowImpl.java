@@ -5,6 +5,8 @@ import com.recargapay.orchestrator.activities.FraudActivity;
 import com.recargapay.orchestrator.activities.TsActivity;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
+import io.temporal.failure.ActivityFailure;
+import io.temporal.workflow.Saga;
 import io.temporal.workflow.Workflow;
 
 import java.time.Duration;
@@ -28,10 +30,17 @@ public class BasicOrdersWorkflowImpl implements BasicOrdersWorkflow {
 
     @Override
     public String start() {
-
-        fraud.verify();
-        ts.save();
-        checkout.giveProduct();
-        return "READY";
+        Saga.Options sagaOptions = new Saga.Options.Builder().setParallelCompensation(true).build();
+        Saga saga = new Saga(sagaOptions);
+        try {
+            fraud.verify();
+            saga.addCompensation(fraud::compensateVerify);
+            ts.save();
+            checkout.giveProduct();
+            return "READY";
+        } catch (ActivityFailure e) {
+            saga.compensate();
+            throw e;
+        }
     }
 }

@@ -8,4 +8,7 @@ public interface FraudActivity {
 
     @ActivityMethod
     void verify();
+
+    @ActivityMethod
+    void compensateVerify();
 }

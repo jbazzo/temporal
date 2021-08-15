@@ -14,4 +14,9 @@ public class FraudActivityImpl implements FraudActivity {
                 = restTemplate.getForEntity(fooResourceUrl, String.class );
         System.out.println(response.getBody());
     }
+
+    @Override
+    public void compensateVerify() {
+        System.out.println("Compensating the verification process");
+    }
 }
