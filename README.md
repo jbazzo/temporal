@@ -1,5 +1,10 @@
 # temporal
 
+Software requirements
+- mvn
+- docker
+- java 11
+
 Instructions:
 - clone this repo
 - cd into the folder
